@@ -79,7 +79,7 @@ class Container
     {
         $className = $this->getAliasForClass($className);
 
-        if ($className == '\Bonefish\DependencyInjection\Container') {
+        if (ltrim($className,'\\') == 'Bonefish\DependencyInjection\Container') {
             return $this;
         }
 
@@ -101,7 +101,7 @@ class Container
 
     public function create($className, $parameters = array())
     {
-        if ($className == '\Bonefish\DependencyInjection\Container') {
+        if (ltrim($className,'\\') == 'Bonefish\DependencyInjection\Container') {
             return $this;
         }
 
@@ -147,7 +147,7 @@ class Container
         }
 
         foreach ($r->getProperties() as $property) {
-            $this->processProperty($obj, $property);
+            $this->processProperty($obj, $property, $r);
         }
 
         $this->callInitMethods($obj);
@@ -165,10 +165,11 @@ class Container
     /**
      * @param object $obj
      * @param \Nette\Reflection\Property $property
+     * @param \Nette\Reflection\ClassType $r
      * @throws \Exception
      */
 
-    protected function processProperty($obj, \Nette\Reflection\Property $property)
+    protected function processProperty($obj, \Nette\Reflection\Property $property, $r)
     {
         if ($property->hasAnnotation('inject')) {
             if (!$property->hasAnnotation('var')) {
@@ -179,7 +180,7 @@ class Container
             if ($property->getAnnotation('inject') === 'eagerly') {
                 $eager = true;
             }
-            $this->performDependencyInjection($obj, $property, $class, $eager);
+            $this->performDependencyInjection($obj, $property, $class, $eager, $r);
         }
     }
 
@@ -190,11 +191,14 @@ class Container
      * @param \ReflectionProperty $property
      * @param string $className
      * @param bool $eager
+     * @param \Nette\Reflection\ClassType $r
      */
 
-    protected function performDependencyInjection($parent, \ReflectionProperty $property, $className, $eager)
+    protected function performDependencyInjection($parent, \ReflectionProperty $property, $className, $eager, $r)
     {
-        if ($className == '\Bonefish\DependencyInjection\Container') {
+        $className = \Nette\Reflection\AnnotationsParser::expandClassName($className,$r);
+
+        if ($className == 'Bonefish\DependencyInjection\Container') {
             $value = $this;
         } else {
             if (!$eager) {
