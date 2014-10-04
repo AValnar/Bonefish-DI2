@@ -196,7 +196,7 @@ class Container
 
     protected function performDependencyInjection($parent, \ReflectionProperty $property, $className, $eager, $r)
     {
-        $className = \Nette\Reflection\AnnotationsParser::expandClassName($className,$r);
+        $className = '\\'.\Nette\Reflection\AnnotationsParser::expandClassName($className,$r);
 
         if ($className == 'Bonefish\DependencyInjection\Container') {
             $value = $this;
